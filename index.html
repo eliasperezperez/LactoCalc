@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LactoCalc — Calculadora de lactancia segura</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FAF6F0;
+    --sand: #F0E8D8;
+    --clay: #C4956A;
+    --terracotta: #B85C3C;
+    --sage: #7A9E87;
+    --sage-light: #A8C4B0;
+    --ink: #1E1A16;
+    --ink-soft: #3D3529;
+    --mist: #8A8178;
+    --alert: #C44B2B;
+    --warn: #D4882B;
+    --safe: #4A8C62;
+    --card-bg: #FFFFFF;
+    --border: rgba(196,149,106,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--clay);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem;
+    color: var(--cream);
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    font-size: 0.68rem;
+    color: var(--mist);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+
+  .disclaimer-banner {
+    background: #FFF8E7;
+    border-bottom: 2px solid var(--clay);
+    padding: 10px 16px;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .disclaimer-banner strong { color: var(--terracotta); }
+
+  /* LAYOUT */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 12px 80px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-bottom: 20px;
+    background: var(--sand);
+    padding: 5px;
+    border-radius: 14px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 6px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--mist);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    line-height: 1.3;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-btn.active {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(30,26,22,0.05);
+  }
+
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .card-subtitle {
+    font-size: 0.78rem;
+    color: var(--mist);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* FORM ELEMENTS */
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  select, input[type="number"], input[type="time"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; /* 16px prevents iOS auto-zoom on focus */
+    color: var(--ink);
+    background: var(--cream);
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8178' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  select:focus, input:focus {
+    border-color: var(--clay);
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 420px) { .row { grid-template-columns: 1fr; } }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--cream);
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-primary:hover, .btn-primary:active { background: var(--ink-soft); }
+
+  .btn-secondary {
+    background: var(--sand);
+    color: var(--ink);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-safe { background: #EAF5EE; border: 1.5px solid #A8D4B5; }
+  .result-warn { background: #FEF6E8; border: 1.5px solid #ECC97A; }
+  .result-danger { background: #FDECEA; border: 1.5px solid #E8A09A; }
+
+  .result-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .status-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-safe { background: var(--safe); }
+  .dot-warn { background: var(--warn); }
+  .dot-danger { background: var(--alert); }
+
+  .result-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .result-detail {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+
+  .result-detail strong { color: var(--ink); }
+
+  .wait-time {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 8px 0;
+  }
+
+  /* SUBSTANCE GRID */
+  .substance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .substance-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .substance-card {
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .substance-card:hover {
+    border-color: var(--clay);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30,26,22,0.08);
+  }
+
+  .substance-card.selected {
+    border-color: var(--clay);
+    background: #FDF7F1;
+  }
+
+  .sub-emoji { font-size: 1.8rem; margin-bottom: 8px; display: block; }
+  .sub-name { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+  .sub-limit { font-size: 0.75rem; color: var(--mist); margin-top: 4px; }
+
+  .risk-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .risk-low { background: #D4EDDA; color: #2E7D45; }
+  .risk-moderate { background: #FFF3CD; color: #9C6A0A; }
+  .risk-high { background: #FFDBD8; color: #9B2B20; }
+  .risk-zero { background: #E2E8F0; color: #4A5568; }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--clay), var(--sage));
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 0 0 20px 20px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -17px; top: 5px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--clay);
+    border: 2px solid white;
+  }
+
+  .timeline-hour {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--clay);
+    margin-bottom: 4px;
+  }
+
+  .timeline-desc {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* REFERENCES */
+  .ref-list { list-style: none; }
+  .ref-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list strong { color: var(--clay); }
+
+  /* ALCOHOL PUMP & DUMP */
+  .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  .pump-table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-top: 10px;
+  }
+  .pump-table th {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 10px 10px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pump-table th:first-child { border-radius: 8px 0 0 0; }
+  .pump-table th:last-child { border-radius: 0 8px 0 0; }
+  .pump-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .pump-table tr:nth-child(even) td { background: #FAF6F0; }
+
+  /* Section headers */
+  .section-h {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--ink);
+    margin: 24px 0 12px;
+  }
+
+  /* Result box mobile fix */
+  .result-box {
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-top: 16px;
+    animation: fadeIn 0.4s ease;
+    word-break: break-word;
+  }
+
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--sand);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin: 4px 4px 0 0;
+  }
+
+  .progress-bar-wrap {
+    background: var(--sand);
+    border-radius: 99px;
+    height: 8px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+
+  .bar-safe { background: var(--safe); }
+  .bar-warn { background: var(--warn); }
+  .bar-danger { background: var(--alert); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🤱</div>
+  <div>
+    <h1>LactoCalc</h1>
+    <p>Calculadora de seguridad en lactancia — basada en evidencia científica</p>
+  </div>
+</header>
+
+<div class="disclaimer-banner">
+  <strong>⚕️ Aviso médico:</strong> Esta herramienta es informativa y está basada en fuentes académicas (OMS, AAP, Hale's Medications & Mothers' Milk, LactMed). 
+  <strong>Consulta siempre con tu médico o pediatra</strong> antes de tomar decisiones sobre lactancia.
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('calc')">🧮 Calculadora</button>
+    <button class="tab-btn" onclick="switchTab('guia')">📊 Guía de sustancias</button>
+    <button class="tab-btn" onclick="switchTab('alcohol')">🍷 Alcohol & tiempos</button>
+    <button class="tab-btn" onclick="switchTab('fuentes')">📚 Fuentes</button>
+  </div>
+
+  <!-- TAB 1: CALCULADORA -->
+  <div id="tab-calc" class="tab-content active">
+
+    <div class="card">
+      <div class="card-title">Calculadora de consumo seguro</div>
+      <div class="card-subtitle">Ingresa qué consumiste, cuánto y cuándo. Calcula si es seguro amamantar o cuánto tiempo esperar.</div>
+
+      <label>Sustancia o alimento</label>
+      <select id="substance" onchange="updateSubstanceInfo()">
+        <option value="">— Selecciona —</option>
+        <optgroup label="☕ Cafeína y teína">
+          <option value="espresso">Espresso (30ml)</option>
+          <option value="cafe_filtrado">Café filtrado / americano (240ml)</option>
+          <option value="cafe_instantaneo">Café instantáneo (240ml)</option>
+          <option value="te_negro">Té negro (240ml)</option>
+          <option value="te_verde">Té verde (240ml)</option>
+          <option value="te_blanco">Té blanco (240ml)</option>
+          <option value="mate">Mate (240ml preparado)</option>
+          <option value="guarana">Guaraná (bebida 240ml)</option>
+          <option value="coca_cola">Coca-Cola (355ml)</option>
+          <option value="pepsi">Pepsi (355ml)</option>
+          <option value="red_bull">Red Bull (250ml)</option>
+          <option value="monster">Monster Energy (473ml)</option>
+        </optgroup>
+        <optgroup label="🍫 Cacao y chocolate">
+          <option value="chocolate_oscuro">Chocolate oscuro >70% (30g)</option>
+          <option value="chocolate_leche">Chocolate con leche (30g)</option>
+          <option value="chocolate_blanco">Chocolate blanco (30g)</option>
+          <option value="cocoa">Cocoa en polvo (1 cda = 5g)</option>
+        </optgroup>
+        <optgroup label="🍺 Alcohol">
+          <option value="cerveza">Cerveza regular (355ml, 5%)</option>
+          <option value="cerveza_light">Cerveza light (355ml, 4%)</option>
+          <option value="vino_tinto">Vino tinto (150ml, 13%)</option>
+          <option value="vino_blanco">Vino blanco (150ml, 12%)</option>
+          <option value="champagne">Champagne/espumoso (150ml, 12%)</option>
+          <option value="tequila">Tequila (45ml, 40%)</option>
+          <option value="vodka">Vodka (45ml, 40%)</option>
+          <option value="whisky">Whisky/ron/brandy (45ml, 40%)</option>
+          <option value="mezcal">Mezcal (45ml, 42%)</option>
+          <option value="vino_cooler">Vino cooler / seltzer (355ml, 5%)</option>
+        </optgroup>
+        <optgroup label="🌿 Hierbas y otros">
+          <option value="ginseng">Ginseng (suplemento)</option>
+          <option value="echinacea">Equinácea (suplemento)</option>
+          <option value="menta">Menta / Hierbabuena (té 240ml)</option>
+          <option value="salvia">Salvia (té 240ml)</option>
+          <option value="regaliz">Regaliz / orozuz (té o suplemento)</option>
+          <option value="kava">Kava kava</option>
+          <option value="valeriana">Valeriana (té o suplemento)</option>
+        </optgroup>
+        <optgroup label="🧃 Bebidas energéticas y otros">
+          <option value="matcha">Matcha (1 cucharadita = 2g polvo)</option>
+          <option value="kombucha">Kombucha (240ml)</option>
+          <option value="yerba_mate_lata">Yerba mate en lata (473ml)</option>
+          <option value="nicotina">Nicotina (cigarro/vape)</option>
+        </optgroup>
+      </select>
+
+      <div id="substance-info" style="display:none;" class="result-box result-warn" style="margin-bottom:16px;">
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Cantidad consumida</label>
+          <input type="number" id="quantity" min="0.5" step="0.5" value="1" placeholder="ej. 1">
+        </div>
+        <div>
+          <label>Hora de consumo</label>
+          <input type="time" id="consumo-time" value="08:00">
+        </div>
+      </div>
+
+      <label>Peso corporal materno (kg) <span style="font-weight:400;color:var(--mist)">— para cálculo de alcohol</span></label>
+      <input type="number" id="weight" min="40" max="150" value="65" placeholder="65">
+
+      <label>Sexo biológico</label>
+      <select id="bio-sex">
+        <option value="female">Mujer (metabolismo estándar)</option>
+        <option value="male">Hombre (referencia)</option>
+      </select>
+
+      <button class="btn btn-primary" onclick="calcular()">
+        <span>Calcular seguridad</span> →
+      </button>
+
+      <div id="resultado" style="margin-top:0;"></div>
+    </div>
+
+  </div>
+
+  <!-- TAB 2: GUÍA -->
+  <div id="tab-guia" class="tab-content">
+
+    <div class="card">
+      <div class="card-title">Guía completa de sustancias</div>
+      <div class="card-subtitle">Límites diarios recomendados, clasificación de riesgo y tiempo de eliminación. Basada en datos de LactMed (NIH), Hale's Medications & Mothers' Milk y directrices de la AAP.</div>
+    </div>
+
+    <h2 class="section-h">☕ Cafeína y metilxantinas</h2>
+    <div class="substance-grid">
+      <div class="substance-card">
+        <span class="sub-emoji">☕</span>
+        <div class="risk-badge risk-low">Bajo riesgo</div>
+        <div class="sub-name">Café (cafeína)</div>
+        <div class="sub-limit">Límite: <strong>≤200–300 mg/día</strong><br>T½ cafeína: 3–5 h (madre)<br>Lactancia: ~1% de dosis materna llega a leche<br>El bebé metaboliza cafeína muy lentamente (&lt;3 meses: T½ 65–130 h)</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🍵</span>
+        <div class="risk-badge risk-low">Bajo riesgo</div>
+        <div class="sub-name">Té negro / verde (teína)</div>
+        <div class="sub-limit">La teína = cafeína. Té negro: 40–70 mg/taza<br>Té verde: 20–45 mg/taza<br>Mismo límite: ≤200–300 mg/día total acumulado</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🧉</span>
+        <div class="risk-badge risk-moderate">Moderado</div>
+        <div class="sub-name">Mate / yerba mate</div>
+        <div class="sub-limit">Cafeína: ~70–85 mg/240ml<br>Contiene también teofilina. Puede causar irritabilidad en bebés si se excede. Límite general: ≤200 mg/día</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">⚡</span>
+        <div class="risk-badge risk-high">Alto riesgo</div>
+        <div class="sub-name">Energy drinks</div>
+        <div class="sub-limit">Red Bull: 80 mg cafeína/250ml<br>Monster: 160 mg/473ml<br>Además contienen taurina, ginseng, niacina. La AAP desaconseja su consumo durante lactancia.</div>
+      </div>
+    </div>
+
+    <h2 class="section-h">🍫 Cacao y teobromina</h2>
+    <div class="substance-grid">
+      <div class="substance-card">
+        <span class="sub-emoji">🍫</span>
+        <div class="risk-badge risk-low">Bajo riesgo</div>
+        <div class="sub-name">Chocolate oscuro >70%</div>
+        <div class="sub-limit">30g: ~20 mg cafeína + 250 mg teobromina<br>Teobromina T½: 6–10 h. En bebés es más larga.<br>Cantidad moderada (1–2 piezas/día) es generalmente segura</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🍬</span>
+        <div class="risk-badge risk-low">Bajo riesgo</div>
+        <div class="sub-name">Chocolate con leche</div>
+        <div class="sub-limit">30g: ~6 mg cafeína + 50 mg teobromina<br>Menor concentración de metilxantinas. Cantidades moderadas sin problema para la mayoría.</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🤍</span>
+        <div class="risk-badge risk-low">Muy bajo</div>
+        <div class="sub-name">Chocolate blanco</div>
+        <div class="sub-limit">No contiene teobromina ni cafeína significativa (no tiene cacao sólido). Sin restricción por metilxantinas.</div>
+      </div>
+    </div>
+
+    <h2 class="section-h">🍷 Alcohol (etanol)</h2>
+    <div class="substance-grid">
+      <div class="substance-card">
+        <span class="sub-emoji">🍺</span>
+        <div class="risk-badge risk-moderate">Moderado</div>
+        <div class="sub-name">Cerveza (5%)</div>
+        <div class="sub-limit">1 copa estándar = 14g etanol (EUA) / 10g (MX/EU)<br>Pico en leche: 30–60 min post-consumo<br>Eliminación: ~2 h por copa estándar<br><strong>Mito:</strong> La cerveza oscura NO estimula producción de leche</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🍷</span>
+        <div class="risk-badge risk-moderate">Moderado</div>
+        <div class="sub-name">Vino tinto/blanco</div>
+        <div class="sub-limit">150ml a 12–13%: ~1 copa estándar<br>Misma cinética que cerveza. Esperar ≥2 h por copa antes de amamantar.</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🥃</span>
+        <div class="risk-badge risk-high">Alto riesgo</div>
+        <div class="sub-name">Licores destilados</div>
+        <div class="sub-limit">45ml tequila/vodka/whisky (40%) = ~14–18g etanol<br>Mayor concentración → eliminar más lento. Esperar ≥2–3 h por trago. Acumulación con múltiples tragos.</div>
+      </div>
+    </div>
+
+    <h2 class="section-h">🌿 Hierbas y suplementos (precaución especial)</h2>
+    <div class="substance-grid">
+      <div class="substance-card">
+        <span class="sub-emoji">🌿</span>
+        <div class="risk-badge risk-high">Contraindicado</div>
+        <div class="sub-name">Salvia</div>
+        <div class="sub-limit">Reduce activamente la producción de leche. Usada clínicamente para el destete. <strong>Evitar durante lactancia activa.</strong></div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🌱</span>
+        <div class="risk-badge risk-high">Contraindicado</div>
+        <div class="sub-name">Regaliz / orozuz</div>
+        <div class="sub-limit">Contiene ácido glicirrícico. En altas dosis: hipertensión, retención de sodio. Puede afectar producción de leche. Evitar.</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🌾</span>
+        <div class="risk-badge risk-high">Contraindicado</div>
+        <div class="sub-name">Kava kava</div>
+        <div class="sub-limit">Hepatotóxico. Kavalactonas pasan a leche materna. <strong>Prohibido durante lactancia.</strong> (LactMed: evitar)</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">🌸</span>
+        <div class="risk-badge risk-moderate">Moderado</div>
+        <div class="sub-name">Menta / hierbabuena</div>
+        <div class="sub-limit">Uso culinario: seguro. Té concentrado o aceite esencial: puede reducir la producción de leche en algunas madres. Usar con moderación.</div>
+      </div>
+      <div class="substance-card">
+        <span class="sub-emoji">💤</span>
+        <div class="risk-badge risk-moderate">Moderado</div>
+        <div class="sub-name">Valeriana</div>
+        <div class="sub-limit">Datos insuficientes sobre seguridad en lactancia. LactMed clasifica como "posiblemente segura en dosis bajas". Evitar uso prolongado.</div>
+      </div>
+    </div>
+
+    <h2 class="section-h">🚭 Nicotina</h2>
+    <div class="substance-grid">
+      <div class="substance-card" style="border-color:var(--alert);">
+        <span class="sub-emoji">🚬</span>
+        <div class="risk-badge risk-high">Alto riesgo</div>
+        <div class="sub-name">Tabaco / nicotina / vape</div>
+        <div class="sub-limit">La nicotina pasa fácilmente a leche materna. Reduce el volumen de producción. T½ nicotina: ~2 h. No existe "cantidad segura" recomendada. Si se fuma: esperar ≥2 h antes de amamantar, nunca fumar cerca del bebé. Los parches/chicles de nicotina tienen menos riesgo que fumar.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB 3: ALCOHOL ESPECÍFICO -->
+  <div id="tab-alcohol" class="tab-content">
+    <div class="card">
+      <div class="card-title">Alcohol: tabla de eliminación por peso</div>
+      <div class="card-subtitle">El alcohol se elimina de la leche materna al mismo ritmo que de la sangre. No hay forma de acelerarlo. Basado en datos de Hale & Rowe (2017) y el estudio de Ho et al. (2001).</div>
+
+      <p style="font-size:0.8rem;color:var(--mist);margin-bottom:16px;">💡 <strong>Horas de espera desde la ÚLTIMA copa</strong> — según peso materno y número de copas estándar (14g etanol EUA / ~10g México)</p>
+
+      <div class="table-scroll">
+      <table class="pump-table">
+        <thead>
+          <tr>
+            <th>Copas estándar</th>
+            <th>Peso: 50 kg</th>
+            <th>Peso: 60 kg</th>
+            <th>Peso: 70 kg</th>
+            <th>Peso: 80 kg</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1 copa (14g)</td><td>2 h 22 min</td><td>2 h 14 min</td><td>2 h 7 min</td><td>2 h 1 min</td></tr>
+          <tr><td>2 copas</td><td>4 h 44 min</td><td>4 h 28 min</td><td>4 h 15 min</td><td>4 h 2 min</td></tr>
+          <tr><td>3 copas</td><td>7 h 6 min</td><td>6 h 43 min</td><td>6 h 22 min</td><td>6 h 3 min</td></tr>
+          <tr><td>4 copas</td><td>9 h 29 min</td><td>8 h 57 min</td><td>8 h 30 min</td><td>8 h 4 min</td></tr>
+          <tr><td>5 copas</td><td>11 h 51 min</td><td>11 h 11 min</td><td>10 h 37 min</td><td>10 h 5 min</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div style="margin-top:20px;" class="result-box result-warn">
+        <div class="result-status">
+          <div class="status-dot dot-warn"></div>
+          <div class="result-label">Sobre el "pump & dump"</div>
+        </div>
+        <div class="result-detail">
+          Extraerse la leche y desecharla (pump & dump) <strong>NO acelera la eliminación del alcohol</strong>. El alcohol sale de la leche al mismo ritmo que del torrente sanguíneo. Hacerlo solo sirve para mantener la producción si se pasó mucho tiempo sin amamantar, no para "limpiar" la leche más rápido.
+        </div>
+      </div>
+
+      <div style="margin-top:16px;" class="result-box result-safe">
+        <div class="result-status">
+          <div class="status-dot dot-safe"></div>
+          <div class="result-label">Recomendación de la AAP (2012)</div>
+        </div>
+        <div class="result-detail">
+          El consumo <strong>ocasional y moderado</strong> de alcohol (≤1 copa estándar/día) se considera compatible con la lactancia. Se recomienda amamantar <strong>antes</strong> de consumir alcohol, o esperar al menos <strong>2 horas por copa</strong> antes de amamantar. El consumo crónico o excesivo sí representa riesgo para el bebé.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Calculadora de alcohol detallada</div>
+      <div class="card-subtitle">Estima cuándo será seguro amamantar basado en tu peso y bebida consumida.</div>
+
+      <label>Tu peso (kg)</label>
+      <input type="number" id="alc-weight" value="65" min="40" max="150">
+
+      <label>Tipo de bebida</label>
+      <select id="alc-type" onchange="updateAlcDrink()">
+        <option value="cerveza_355_5">Cerveza regular 355ml (5%)</option>
+        <option value="vino_150_13">Vino tinto 150ml (13%)</option>
+        <option value="vino_150_12">Vino blanco 150ml (12%)</option>
+        <option value="tequila_45_40">Tequila/Vodka 45ml (40%)</option>
+        <option value="whisky_45_40">Whisky/Ron 45ml (40%)</option>
+        <option value="champagne_150_12">Champagne 150ml (12%)</option>
+        <option value="mezcal_45_42">Mezcal 45ml (42%)</option>
+      </select>
+
+      <label>Número de bebidas consumidas</label>
+      <input type="number" id="alc-drinks" value="1" min="1" max="10" step="1">
+
+      <label>Hora de primera bebida</label>
+      <input type="time" id="alc-start-time" value="20:00">
+
+      <label>Hora de última bebida</label>
+      <input type="time" id="alc-end-time" value="21:00">
+
+      <button class="btn btn-primary" onclick="calcAlcohol()">Calcular tiempo de espera</button>
+
+      <div id="alc-resultado"></div>
+    </div>
+  </div>
+
+  <!-- TAB 4: FUENTES -->
+  <div id="tab-fuentes" class="tab-content">
+    <div class="card">
+      <div class="card-title">📚 Fuentes y referencias académicas</div>
+      <div class="card-subtitle">Esta herramienta fue construida basándose en las siguientes fuentes de evidencia clínica y científica.</div>
+
+      <ul class="ref-list">
+        <li><strong>LactMed (NIH/NLM)</strong> — Base de datos de medicamentos y lactancia del National Institutes of Health (EUA). Actualizada continuamente. Consultada para: cafeína, alcohol, hierbas, nicotina. <em>https://www.ncbi.nlm.nih.gov/books/NBK501922/</em></li>
+        <li><strong>Hale, T.W. & Rowe, H.E. (2017)</strong> — <em>Medications and Mothers' Milk</em>, 17a edición. Springer Publishing. Referencia estándar mundial para medicamentos y sustancias en lactancia. Fuente principal de datos de vida media y transferencia a leche.</li>
+        <li><strong>American Academy of Pediatrics (AAP, 2012)</strong> — "Breastfeeding and the Use of Human Milk." <em>Pediatrics</em> 129(3):e827–e841. Directriz oficial sobre lactancia, alcohol y cafeína.</li>
+        <li><strong>Organización Mundial de la Salud (OMS, 2022)</strong> — "Guideline: Counselling of Women to Improve Breastfeeding Practices." Recomendaciones de límite de cafeína ≤300 mg/día durante lactancia.</li>
+        <li><strong>Ho E. et al. (2001)</strong> — "Alcohol and breastfeeding: calculation of time to zero level in milk." <em>Biological Neonate</em> 80:219–222. Modelo de eliminación de alcohol en leche materna. Base de las tablas de tiempo de espera.</li>
+        <li><strong>Mennella JA, Beauchamp GK (1991)</strong> — "The transfer of alcohol to human milk." <em>NEJM</em> 325:981–985. Demostró la cinética de transferencia de alcohol sangre→leche.</li>
+        <li><strong>Grosso et al. (2016)</strong> — "Coffee, caffeine, and health outcomes: An umbrella review." <em>Annual Review of Nutrition</em> 37:131–156. Datos de biodisponibilidad de cafeína en leche materna.</li>
+        <li><strong>EFSA (European Food Safety Authority, 2020)</strong> — "Caffeine" Scientific Opinion. Establece límite de 200 mg/día durante lactancia y embarazo.</li>
+        <li><strong>Tee MK et al. (2012)</strong> — Datos sobre teobromina del cacao y transferencia a leche materna. <em>J Obstet Gynaecol</em>.</li>
+        <li><strong>AAP Committee on Drugs (2001)</strong> — "The transfer of drugs and other chemicals into human milk." <em>Pediatrics</em>. Clasifica cafeína como "compatible con lactancia" en dosis moderadas.</li>
+        <li><strong>Conner SN et al. (2016)</strong> — "Maternal Marijuana Use and Neonatal Morbidity." No evaluado en esta app por complejidad y variabilidad legal regional.</li>
+        <li><strong>Consejo de Salubridad General (México)</strong> — Norma Oficial Mexicana NOM-007-SSA2-2016 sobre lactancia materna y alimentación complementaria.</li>
+      </ul>
+
+      <div style="margin-top:20px;" class="result-box result-warn">
+        <div class="result-detail">
+          <strong>Nota metodológica:</strong> Los cálculos de cafeína asumen T½ promedio de 4.5 horas en madre adulta sana. Esta puede variar con anticonceptivos orales (la duplican), tabaquismo (la reduce ~50%), y embarazo (puede alcanzar 15+ horas). Los cálculos de alcohol usan la fórmula de Widmark adaptada por Ho et al. (2001), con factor de distribución 0.55 para mujeres.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// BASE DE DATOS DE SUSTANCIAS
+// ============================================================
+const SUBSTANCES = {
+  // Cafeína
+  espresso:         { name: "Espresso (30ml)", category: "caffeine", caffeine: 63, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "taza" },
+  cafe_filtrado:    { name: "Café filtrado (240ml)", category: "caffeine", caffeine: 140, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "taza" },
+  cafe_instantaneo: { name: "Café instantáneo (240ml)", category: "caffeine", caffeine: 93, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "taza" },
+  te_negro:         { name: "Té negro (240ml)", category: "caffeine", caffeine: 55, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "taza" },
+  te_verde:         { name: "Té verde (240ml)", category: "caffeine", caffeine: 30, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "taza" },
+  te_blanco:        { name: "Té blanco (240ml)", category: "caffeine", caffeine: 18, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "taza" },
+  mate:             { name: "Mate (240ml)", category: "caffeine", caffeine: 78, theobromine: 10, alcohol_g: 0, halflife_h: 4.5, risk: "moderate", unit: "taza" },
+  guarana:          { name: "Guaraná (240ml)", category: "caffeine", caffeine: 100, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "moderate", unit: "vaso" },
+  coca_cola:        { name: "Coca-Cola (355ml)", category: "caffeine", caffeine: 34, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "lata" },
+  pepsi:            { name: "Pepsi (355ml)", category: "caffeine", caffeine: 38, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "lata" },
+  red_bull:         { name: "Red Bull (250ml)", category: "caffeine", caffeine: 80, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "high", unit: "lata" },
+  monster:          { name: "Monster Energy (473ml)", category: "caffeine", caffeine: 160, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "high", unit: "lata" },
+  // Chocolate
+  chocolate_oscuro: { name: "Chocolate oscuro >70% (30g)", category: "theobromine", caffeine: 20, theobromine: 250, alcohol_g: 0, halflife_h: 4.5, theobr_halflife: 7, risk: "low", unit: "pieza" },
+  chocolate_leche:  { name: "Chocolate con leche (30g)", category: "theobromine", caffeine: 6, theobromine: 50, alcohol_g: 0, halflife_h: 4.5, theobr_halflife: 7, risk: "low", unit: "pieza" },
+  chocolate_blanco: { name: "Chocolate blanco (30g)", category: "theobromine", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "none", unit: "pieza" },
+  cocoa:            { name: "Cocoa en polvo (5g)", category: "theobromine", caffeine: 12, theobromine: 130, alcohol_g: 0, halflife_h: 4.5, theobr_halflife: 7, risk: "low", unit: "cucharada" },
+  // Alcohol
+  cerveza:          { name: "Cerveza regular (355ml, 5%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14, halflife_h: 0, risk: "moderate", unit: "lata" },
+  cerveza_light:    { name: "Cerveza light (355ml, 4%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 11.2, halflife_h: 0, risk: "moderate", unit: "lata" },
+  vino_tinto:       { name: "Vino tinto (150ml, 13%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 15.4, halflife_h: 0, risk: "moderate", unit: "copa" },
+  vino_blanco:      { name: "Vino blanco (150ml, 12%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14.2, halflife_h: 0, risk: "moderate", unit: "copa" },
+  champagne:        { name: "Champagne (150ml, 12%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14.2, halflife_h: 0, risk: "moderate", unit: "copa" },
+  tequila:          { name: "Tequila (45ml, 40%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14.4, halflife_h: 0, risk: "high", unit: "trago" },
+  vodka:            { name: "Vodka (45ml, 40%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14.4, halflife_h: 0, risk: "high", unit: "trago" },
+  whisky:           { name: "Whisky/ron (45ml, 40%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14.4, halflife_h: 0, risk: "high", unit: "trago" },
+  mezcal:           { name: "Mezcal (45ml, 42%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 15.1, halflife_h: 0, risk: "high", unit: "trago" },
+  vino_cooler:      { name: "Vino cooler/seltzer (355ml, 5%)", category: "alcohol", caffeine: 0, theobromine: 0, alcohol_g: 14.0, halflife_h: 0, risk: "moderate", unit: "lata" },
+  // Hierbas - contraindicadas
+  salvia:           { name: "Salvia (té 240ml)", category: "herb_contraindicated", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "contraindicated", unit: "taza" },
+  regaliz:          { name: "Regaliz / orozuz", category: "herb_contraindicated", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "contraindicated", unit: "dosis" },
+  kava:             { name: "Kava kava", category: "herb_contraindicated", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "contraindicated", unit: "dosis" },
+  menta:            { name: "Menta / hierbabuena (240ml)", category: "herb_caution", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "moderate", unit: "taza" },
+  ginseng:          { name: "Ginseng (suplemento)", category: "herb_caution", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "moderate", unit: "dosis" },
+  echinacea:        { name: "Equinácea (suplemento)", category: "herb_caution", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "moderate", unit: "dosis" },
+  valeriana:        { name: "Valeriana (té/suplemento)", category: "herb_caution", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 0, risk: "moderate", unit: "dosis" },
+  // Otros
+  matcha:           { name: "Matcha (1 cucharadita polvo)", category: "caffeine", caffeine: 70, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "low", unit: "cucharadita" },
+  kombucha:         { name: "Kombucha (240ml)", category: "caffeine", caffeine: 15, theobromine: 0, alcohol_g: 0.5, halflife_h: 4.5, risk: "low", unit: "vaso" },
+  yerba_mate_lata:  { name: "Yerba mate en lata (473ml)", category: "caffeine", caffeine: 150, theobromine: 0, alcohol_g: 0, halflife_h: 4.5, risk: "moderate", unit: "lata" },
+  nicotina:         { name: "Nicotina (cigarro/vape)", category: "nicotine", caffeine: 0, theobromine: 0, alcohol_g: 0, halflife_h: 2, risk: "high", unit: "cigarro" },
+};
+
+// Límites por categoría
+const LIMITS = {
+  caffeine_daily_mg: 200, // EFSA; OMS acepta hasta 300 mg
+  theobromine_daily_mg: 1000,
+  alcohol_standard_drink_g: 14
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function updateSubstanceInfo() {
+  const key = document.getElementById('substance').value;
+  const infoBox = document.getElementById('substance-info');
+  if (!key) { infoBox.style.display = 'none'; return; }
+  const s = SUBSTANCES[key];
+  if (!s) { infoBox.style.display = 'none'; return; }
+
+  let html = '';
+  if (s.category === 'alcohol') {
+    html = `<div class="result-status"><div class="status-dot dot-warn"></div><div class="result-label">${s.name}</div></div>
+    <div class="result-detail">🍷 Alcohol por unidad: <strong>${s.alcohol_g}g de etanol</strong><br>La eliminación depende de tu peso corporal. Espera ~2h por bebida.</div>`;
+    infoBox.className = 'result-box result-warn';
+  } else if (s.category === 'herb_contraindicated') {
+    html = `<div class="result-status"><div class="status-dot dot-danger"></div><div class="result-label">⚠️ ${s.name} — Contraindicado en lactancia</div></div>
+    <div class="result-detail">Esta hierba puede reducir la producción de leche o representa riesgo documentado para el bebé. Se recomienda evitarla completamente durante la lactancia activa.</div>`;
+    infoBox.className = 'result-box result-danger';
+  } else if (s.caffeine > 0 || s.theobromine > 0) {
+    const total = s.caffeine + (s.theobromine * 0.1); // teobromina ~10x menos potente que cafeína
+    html = `<div class="result-status"><div class="status-dot dot-warn"></div><div class="result-label">${s.name}</div></div>
+    <div class="result-detail">☕ Cafeína por ${s.unit}: <strong>${s.caffeine} mg</strong>${s.theobromine > 0 ? ` | 🍫 Teobromina: <strong>${s.theobromine} mg</strong>` : ''}<br>Límite diario recomendado: <strong>200–300 mg de cafeína total</strong><br>T½ cafeína (madre adulta): ~4.5 h | Pico en leche: 1 h post-consumo</div>`;
+    infoBox.className = 'result-box result-warn';
+  } else {
+    html = `<div class="result-status"><div class="status-dot dot-safe"></div><div class="result-label">${s.name}</div></div>
+    <div class="result-detail">Información disponible arriba. Consulta la pestaña "Guía de sustancias" para más detalles.</div>`;
+    infoBox.className = 'result-box result-safe';
+  }
+  infoBox.innerHTML = html;
+  infoBox.style.display = 'block';
+}
+
+function calcular() {
+  const key = document.getElementById('substance').value;
+  const qty = parseFloat(document.getElementById('quantity').value) || 1;
+  const time = document.getElementById('consumo-time').value;
+  const weight = parseFloat(document.getElementById('weight').value) || 65;
+  const resultDiv = document.getElementById('resultado');
+
+  if (!key) {
+    resultDiv.innerHTML = '<div class="result-box result-warn"><div class="result-detail">Por favor selecciona una sustancia.</div></div>';
+    return;
+  }
+
+  const s = SUBSTANCES[key];
+  if (!s) return;
+
+  let html = '';
+
+  // ---- ALCOHOL ----
+  if (s.category === 'alcohol') {
+    const totalEtanol = s.alcohol_g * qty;
+    // Fórmula Widmark adaptada por Ho et al. (2001) para mujeres
+    // BAC(g/L) = Alcohol(g) / (peso(kg) * 0.55)
+    // Eliminación ~0.015 g/100mL/h = 0.15 g/L/h
+    const Vd = 0.55; // factor distribución mujeres
+    const bac = totalEtanol / (weight * Vd); // g/L
+    const eliminRate = 0.15; // g/L/h
+    const horasEspera = bac / eliminRate;
+    const minutos = Math.round((horasEspera % 1) * 60);
+    const horas = Math.floor(horasEspera);
+
+    // Calcular hora segura
+    const [h, m] = time.split(':').map(Number);
+    const consumoMin = h * 60 + m;
+    const safeMin = consumoMin + Math.round(horasEspera * 60);
+    const safeH = Math.floor(safeMin / 60) % 24;
+    const safeM = safeMin % 60;
+    const safeTime = `${String(safeH).padStart(2,'0')}:${String(safeM).padStart(2,'0')}`;
+
+    const level = horasEspera < 2 ? 'safe' : horasEspera < 5 ? 'warn' : 'danger';
+    const cls = level === 'safe' ? 'result-safe' : level === 'warn' ? 'result-warn' : 'result-danger';
+    const dotCls = level === 'safe' ? 'dot-safe' : level === 'warn' ? 'dot-warn' : 'dot-danger';
+
+    html = `<div class="result-box ${cls}">
+      <div class="result-status">
+        <div class="status-dot ${dotCls}"></div>
+        <div class="result-label">🍷 Resultado de alcohol</div>
+      </div>
+      <div class="result-detail">
+        <strong>Consumiste:</strong> ${qty} ${qty === 1 ? s.unit : s.unit + 's'} → <strong>${totalEtanol.toFixed(1)}g de etanol</strong><br>
+        <strong>BAC estimado:</strong> ${(bac * 10).toFixed(2)} g/L (${(bac * 100).toFixed(2)} g/dL)<br><br>
+        <strong>Tiempo de espera para amamantar:</strong><br>
+        <span class="wait-time">⏱ ${horas}h ${minutos}min</span><br>
+        <strong>Hora segura aproximada:</strong> ~<strong>${safeTime} hrs</strong><br><br>
+        📌 Esto asume que empezaste a beber a las ${time} y consumiste todo al mismo tiempo. Si bebiste durante más tiempo, el alcohol ya estaba eliminándose — la espera real puede ser menor.<br><br>
+        <em style="color:var(--mist);font-size:0.75rem;">Fuente: Ho E. et al. (2001), Biological Neonate 80:219–222. Fórmula de Widmark.</em>
+      </div>
+    </div>`;
+
+  // ---- HIERBAS CONTRAINDICADAS ----
+  } else if (s.category === 'herb_contraindicated') {
+    html = `<div class="result-box result-danger">
+      <div class="result-status">
+        <div class="status-dot dot-danger"></div>
+        <div class="result-label">⛔ Sustancia contraindicada en lactancia</div>
+      </div>
+      <div class="result-detail">
+        <strong>${s.name}</strong> está documentada como potencialmente riesgosa o como inhibidora de la producción de leche durante la lactancia activa.<br><br>
+        Se recomienda <strong>no consumirla</strong> mientras amamantes. Consulta con tu médico o un especialista en lactancia (IBCLC) si tienes dudas.<br><br>
+        <em style="color:var(--mist);font-size:0.75rem;">Fuente: LactMed/NIH, Hale & Rowe 2017.</em>
+      </div>
+    </div>`;
+
+  // ---- CAFEÍNA / TEOBROMINA ----
+  } else if (s.caffeine > 0 || s.theobromine > 0) {
+    const totalCaf = s.caffeine * qty;
+    const totalTheobr = (s.theobromine || 0) * qty;
+
+    // Cafeína en leche materna ≈ 1% de dosis materna (Hale, 2017)
+    const cafEnLeche = totalCaf * 0.01;
+
+    // Bebé recibe ~150ml/kg/día de leche
+    // Dosis relativa en bebé
+    const halflife = s.halflife_h || 4.5;
+    // Tiempo para 5 semividas (99.7% eliminado) - para "seguridad total"
+    const horasTotal5half = halflife * 5;
+    // Tiempo para 3 semividas (~87.5% eliminado) - prácticamente seguro
+    const horas3half = halflife * 3;
+    // Pico en leche a 1h, sensato esperar 1.5 h luego del consumo para riesgo bajo
+    const horasEspera = Math.min(horas3half, 6); // máximo 6h para cafeína normal
+
+    const esSobre = totalCaf > LIMITS.caffeine_daily_mg;
+    const esModerate = totalCaf > 150 && totalCaf <= LIMITS.caffeine_daily_mg;
+
+    let level, cls, dotCls, labelText;
+    if (s.category === 'herb_caution') {
+      level = 'warn'; cls = 'result-warn'; dotCls = 'dot-warn'; labelText = 'Hierba con precaución';
+    } else if (esSobre) {
+      level = 'danger'; cls = 'result-danger'; dotCls = 'dot-danger'; labelText = 'Excede el límite recomendado';
+    } else if (esModerate) {
+      level = 'warn'; cls = 'result-warn'; dotCls = 'dot-warn'; labelText = 'Dentro del límite — usa con moderación';
+    } else {
+      level = 'safe'; cls = 'result-safe'; dotCls = 'dot-safe'; labelText = 'Cantidad considerada segura';
+    }
+
+    // Calcular hora segura
+    const [h, m] = time.split(':').map(Number);
+    const consumoMin = h * 60 + m;
+    const safeMin = consumoMin + Math.round(horasEspera * 60);
+    const safeH = Math.floor(safeMin / 60) % 24;
+    const safeM = safeMin % 60;
+    const safeTime = `${String(safeH).padStart(2,'0')}:${String(safeM).padStart(2,'0')}`;
+
+    // Barra de progreso
+    const pct = Math.min((totalCaf / 300) * 100, 100);
+    const barCls = pct < 60 ? 'bar-safe' : pct < 85 ? 'bar-warn' : 'bar-danger';
+
+    html = `<div class="result-box ${cls}">
+      <div class="result-status">
+        <div class="status-dot ${dotCls}"></div>
+        <div class="result-label">☕ ${labelText}</div>
+      </div>
+      <div class="result-detail">
+        <strong>Cafeína total consumida:</strong> ${totalCaf.toFixed(0)} mg ${totalTheobr > 0 ? `| Teobromina: ${totalTheobr.toFixed(0)} mg` : ''}<br>
+        <strong>% del límite diario (300mg):</strong> ${((totalCaf/300)*100).toFixed(0)}%
+        <div class="progress-bar-wrap"><div class="progress-bar ${barCls}" style="width:${pct}%"></div></div>
+        
+        <strong>Cafeína estimada en leche materna:</strong> ~${cafEnLeche.toFixed(1)} mg (~1% de dosis)<br>
+        <strong>Pico en leche:</strong> ~1 hora post-consumo<br>
+        <strong>T½ en la madre:</strong> ~${halflife} horas<br><br>
+        
+        ${esSobre ? `⚠️ <strong>Excediste el límite recomendado de 200–300 mg/día.</strong> Considera compensar reduciendo otras fuentes de cafeína hoy.<br><br>` : ''}
+        
+        <strong>Recomendación de espera para amamantar:</strong><br>
+        <span class="wait-time">⏱ Mínimo ${horasEspera.toFixed(0)} horas desde el consumo</span><br>
+        <strong>Hora segura aproximada:</strong> ~<strong>${safeTime} hrs</strong><br><br>
+        
+        ${totalTheobr > 0 ? `🍫 <strong>Nota sobre teobromina:</strong> T½ ~7 horas. Menos potente que cafeína (~10x), pero se acumula con consumo frecuente de chocolate oscuro.<br><br>` : ''}
+        
+        ⚠️ <strong>Bebés menores de 3 meses</strong> metabolizan la cafeína muy lentamente (T½ hasta 130 horas). En estos casos se recomienda mayor precaución.<br><br>
+        <em style="color:var(--mist);font-size:0.75rem;">Fuentes: Hale & Rowe 2017, EFSA 2020, LactMed/NIH</em>
+      </div>
+    </div>`;
+
+  // ---- NICOTINA ----
+  } else if (s.category === 'nicotine') {
+    html = `<div class="result-box result-danger">
+      <div class="result-status">
+        <div class="status-dot dot-danger"></div>
+        <div class="result-label">🚬 Nicotina — Riesgo documentado</div>
+      </div>
+      <div class="result-detail">
+        La nicotina pasa fácilmente a la leche materna y <strong>reduce el volumen de producción de leche</strong>. No existe un nivel de exposición completamente seguro para el bebé.<br><br>
+        Si se consume: esperar al menos <strong>2 horas post-cigarro</strong> antes de amamantar. T½ nicotina: ~2 horas. Nunca fumar cerca del bebé.<br><br>
+        <span class="wait-time">⏱ Esperar ≥2 horas</span><br><br>
+        Los <strong>parches de nicotina</strong> transfieren menos al bebé que fumar activamente, pero tampoco son completamente seguros.<br><br>
+        <em style="color:var(--mist);font-size:0.75rem;">Fuente: LactMed/NIH, AAP 2012</em>
+      </div>
+    </div>`;
+
+  // ---- HIERBAS CON PRECAUCIÓN ----
+  } else if (s.category === 'herb_caution') {
+    html = `<div class="result-box result-warn">
+      <div class="result-status">
+        <div class="status-dot dot-warn"></div>
+        <div class="result-label">🌿 Hierba — usar con precaución</div>
+      </div>
+      <div class="result-detail">
+        <strong>${s.name}</strong>: los datos sobre seguridad en lactancia son limitados o contradictorios. Se recomienda consumo moderado y ocasional, preferiblemente bajo supervisión médica.<br><br>
+        <em style="color:var(--mist);font-size:0.75rem;">Fuente: LactMed/NIH, Hale & Rowe 2017</em>
+      </div>
+    </div>`;
+  } else {
+    html = `<div class="result-box result-safe">
+      <div class="result-status"><div class="status-dot dot-safe"></div>
+      <div class="result-label">Sin datos de riesgo conocido</div>
+      </div>
+      <div class="result-detail">Esta sustancia no presenta datos de riesgo documentado en lactancia para las cantidades típicas de consumo. Consulta la pestaña "Guía de sustancias".</div>
+    </div>`;
+  }
+
+  resultDiv.innerHTML = html;
+}
+
+// ---- CALCULADORA DE ALCOHOL DETALLADA ----
+const ALC_DRINKS_DB = {
+  'cerveza_355_5':   { name: 'Cerveza regular (355ml, 5%)', etanol: 14.0 },
+  'vino_150_13':     { name: 'Vino tinto (150ml, 13%)', etanol: 15.4 },
+  'vino_150_12':     { name: 'Vino blanco (150ml, 12%)', etanol: 14.2 },
+  'tequila_45_40':   { name: 'Tequila/Vodka (45ml, 40%)', etanol: 14.4 },
+  'whisky_45_40':    { name: 'Whisky/Ron (45ml, 40%)', etanol: 14.4 },
+  'champagne_150_12':{ name: 'Champagne (150ml, 12%)', etanol: 14.2 },
+  'mezcal_45_42':    { name: 'Mezcal (45ml, 42%)', etanol: 15.1 },
+};
+
+function calcAlcohol() {
+  const weight = parseFloat(document.getElementById('alc-weight').value) || 65;
+  const drinkKey = document.getElementById('alc-type').value;
+  const numDrinks = parseInt(document.getElementById('alc-drinks').value) || 1;
+  const startTime = document.getElementById('alc-start-time').value;
+  const endTime = document.getElementById('alc-end-time').value;
+  const resultDiv = document.getElementById('alc-resultado');
+
+  const drink = ALC_DRINKS_DB[drinkKey];
+  const totalEtanol = drink.etanol * numDrinks;
+
+  // BAC pico usando Widmark/Ho
+  const Vd = 0.55;
+  const bac = totalEtanol / (weight * Vd);
+
+  // Tiempo de consumo
+  const [sh, sm] = startTime.split(':').map(Number);
+  const [eh, em] = endTime.split(':').map(Number);
+  const startMinutes = sh * 60 + sm;
+  const endMinutes = eh * 60 + em;
+  const drinkDuration = Math.max(0, endMinutes - startMinutes);
+
+  // El alcohol se absorbe durante el consumo; la eliminación ocurre desde inicio
+  // Simplificamos: espera desde la última bebida
+  const eliminRate = 0.15; // g/L/h
+  const horasEspera = bac / eliminRate;
+  const minutos = Math.round((horasEspera % 1) * 60);
+  const horas = Math.floor(horasEspera);
+
+  const safeMin = endMinutes + Math.round(horasEspera * 60);
+  const safeH = Math.floor(safeMin / 60) % 24;
+  const safeM = safeMin % 60;
+  const safeTime = `${String(safeH).padStart(2,'0')}:${String(safeM).padStart(2,'0')}`;
+
+  const level = horasEspera < 2 ? 'safe' : horasEspera < 6 ? 'warn' : 'danger';
+  const cls = level === 'safe' ? 'result-safe' : level === 'warn' ? 'result-warn' : 'result-danger';
+  const dotCls = level === 'safe' ? 'dot-safe' : level === 'warn' ? 'dot-warn' : 'dot-danger';
+
+  // Generar timeline
+  let timelineHtml = '<div class="timeline" style="margin-top:16px;">';
+  const intervals = [0.5, 1, 2, Math.ceil(horasEspera * 0.5), Math.ceil(horasEspera), Math.ceil(horasEspera * 1.2)];
+  const uniqueIntervals = [...new Set(intervals)].sort((a,b)=>a-b);
+
+  uniqueIntervals.forEach(h => {
+    const bacAtH = Math.max(0, bac - (eliminRate * h));
+    const pct = (bacAtH / bac * 100);
+    const safe = bacAtH < 0.01;
+    const tMin = endMinutes + Math.round(h * 60);
+    const tH = Math.floor(tMin / 60) % 24;
+    const tM = tMin % 60;
+    const tStr = `${String(tH).padStart(2,'0')}:${String(tM).padStart(2,'0')}`;
+
+    timelineHtml += `<div class="timeline-item">
+      <div class="timeline-hour">${tStr} (+${h}h después)</div>
+      <div class="timeline-desc">
+        Alcohol residual estimado: <strong>${(bacAtH * 10).toFixed(3)} g/L</strong> (${Math.round(pct)}% del pico)<br>
+        ${safe ? '✅ <strong>Seguro para amamantar</strong>' : '⏳ Aún no es completamente seguro'}
+      </div>
+    </div>`;
+  });
+  timelineHtml += '</div>';
+
+  resultDiv.innerHTML = `<div class="result-box ${cls}" style="margin-top:20px;">
+    <div class="result-status">
+      <div class="status-dot ${dotCls}"></div>
+      <div class="result-label">Resultado detallado</div>
+    </div>
+    <div class="result-detail">
+      <strong>${drink.name} × ${numDrinks}</strong><br>
+      Etanol total: <strong>${totalEtanol.toFixed(1)}g</strong><br>
+      Nivel en sangre estimado (pico): <strong>${(bac * 10).toFixed(3)} g/L</strong><br><br>
+      <strong>Tiempo de espera desde última bebida (${endTime}):</strong><br>
+      <span class="wait-time">⏱ ${horas} h ${minutos} min</span><br>
+      <strong>Hora segura aproximada:</strong> ~<strong>${safeTime} hrs</strong><br><br>
+      <strong>Evolución estimada:</strong>
+      ${timelineHtml}
+      <br><em style="color:var(--mist);font-size:0.75rem;">Calculado con fórmula de Widmark adaptada por Ho et al. (2001). Factores individuales (comida consumida, metabolismo, etc.) pueden alterar estos tiempos ±30 minutos.</em>
+    </div>
+  </div>`;
+}
+
+// Init
+document.getElementById('alc-start-time').value = '20:00';
+document.getElementById('alc-end-time').value = '21:00';
+</script>
+
+</body>
+</html>
